@@ -1,18 +1,19 @@
-// route as string
-var route = "R1, R3, L2, L5, L2, L1, R3, L4, R2, L2, L4, R2, L1, R1, L2, R3, L1, L4, R2, L5, R3, R4, L1, R2, L1, R3, L4, R5, L4, L5, R5, L3, R2, L3, L3, R1, R3, L4, R2, R5, L4, R1, L1, L1, R5, L2, R1, L2, R188, L5, L3, R5, R1, L2, L4, R3, R5, L3, R3, R45, L4, R4, R72, R2, R3, L1, R1, L1, L1, R192, L1, L1, L1, L4, R1, L2, L5, L3, R5, L3, R3, L4, L3, R1, R4, L2, R2, R3, L5, R3, L1, R1, R4, L2, L3, R1, R3, L4, L3, L4, L2, L2, R1, R3, L5, L1, R4, R2, L4, L1, R3, R3, R1, L5, L2, R4, R4, R2, R1, R5, R5, L4, L1, R5, R3, R4, R5, R3, L1, L2, L4, R1, R4, R5, L2, L3, R4, L4, R2, L2, L4, L2, R5, R1, R4, R3, R5, L4, L4, L5, L5, R3, R4, L1, L3, R2, L2, R1, L3, L5, R5, R5, R3, L4, L2, R4, R5, R1, R4, L3";
+const route = "R1, R3, L2, L5, L2, L1, R3, L4, R2, L2, L4, R2, L1, R1, L2, R3, L1, L4, R2, L5, R3, R4, L1, R2, L1, R3, L4, R5, L4, L5, R5, L3, R2, L3, L3, R1, R3, L4, R2, R5, L4, R1, L1, L1, R5, L2, R1, L2, R188, L5, L3, R5, R1, L2, L4, R3, R5, L3, R3, R45, L4, R4, R72, R2, R3, L1, R1, L1, L1, R192, L1, L1, L1, L4, R1, L2, L5, L3, R5, L3, R3, L4, L3, R1, R4, L2, R2, R3, L5, R3, L1, R1, R4, L2, L3, R1, R3, L4, L3, L4, L2, L2, R1, R3, L5, L1, R4, R2, L4, L1, R3, R3, R1, L5, L2, R4, R4, R2, R1, R5, R5, L4, L1, R5, R3, R4, R5, R3, L1, L2, L4, R1, R4, R5, L2, L3, R4, L4, R2, L2, L4, L2, R5, R1, R4, R3, R5, L4, L4, L5, L5, R3, R4, L1, L3, R2, L2, R1, L3, L5, R5, R5, R3, L4, L2, R4, R5, R1, R4, L3";
 
 // function that returns x and y coordinates based on the route
-var getFinalDestination = function(route) {
+const getTripInfo = function(route) {
   // turn route into an array
-  var routeAsArray = route.split(', ');
+  const routeAsArray = route.split(', ');
   // used to track cardinal direction N = 0, E = 90, S = 180, W = 270
-  var pointing = 0;
+  let pointing = 0;
   // start coordinates
-  var x = 0;
-  var y = 0;
+  let x = 0;
+  let y = 0;
+  // path log - sad attempt to track every position step by step
+  let path = [];
 
   // calculates the new cardinal heading
-  function getNewHeading(step) {
+  const getNewHeading = function (step) {
     // reset 360 to 0 to prevent going above 360
     if(pointing === 360)
       pointing = 0;
@@ -28,31 +29,74 @@ var getFinalDestination = function(route) {
       pointing += 360;
   }
 
+  // logs coordinates for a step one by one as object in array - seems way too involved but works (i think)
+  const logPath = function (cOld, cNew, cConst) {
+    let stepLog = {};
+
+    // records each step - totally unnecessary but all I could think of at the time
+    const addToLog = function (cOld,cConst) {
+      if(pointing === 0 || pointing === 180)
+        stepLog = {
+          "x": cOld,
+          "y": cConst
+        };
+      else
+        stepLog = {
+          "x": cConst,
+          "y": cOld
+        };
+      // add to path
+      path.push(stepLog);
+    }
+
+    // if to handle - and + coordinates for loops - also could be done better I think
+    if(cOld < cNew){
+      for(let i = cOld+1; i <= cNew; i++){
+        addToLog(i,cConst);
+      }
+    }
+    else{
+      for(let j = cOld-1; j >= cNew; j--){
+        addToLog(j,cConst);
+      }
+    }
+  }
+
   // performs a turn based on one step of the route
-  function turn(step) {
+  const turn = function (step) {
     // distance to travel along the grid: number portion of the step turned to int
-    var distance = parseInt(step.substring(1, step.length));
+    const distance = parseInt(step.substring(1, step.length));
     // turn direction (L or R)
-    var direction = step.substring(0,1);
+    const direction = step.substring(0,1);
+    // start of turn position
+    const startPos = {
+      "x": x,
+      "y": y
+    }
 
     // switch based on current cardinal direction - this could probably be done better?
     // if you turn left pointing south or east you add distance to x and y respectively
     // if you turn right you subtract
     // if you turn left pointing north or west you subtract distance to x and y respectively
     // if you turn right you add
+    // added log path to track route path by coordinates
     switch (pointing) {
-    case 90:
-      direction === "L" ? y+=distance : y-=distance;
-      break;
-    case 180:
-      direction === "L" ? x+=distance : x-=distance;
-      break;
-    case 270:
-      direction === "L" ? y-=distance : y+=distance;
-      break;
-    default:
-      direction === "L" ? x-=distance : x+=distance;
-      break;
+      case 90:
+        direction === "L" ? y+=distance : y-=distance;
+        logPath(startPos.y, y, x);
+        break;
+      case 180:
+        direction === "L" ? x+=distance : x-=distance;
+        logPath(startPos.x, x, y);
+        break;
+      case 270:
+        direction === "L" ? y-=distance : y+=distance;
+        logPath(startPos.y, y, x);
+        break;
+      default:
+        direction === "L" ? x-=distance : x+=distance;
+        logPath(startPos.x, x, y);
+        break;
     }
 
     // get new cardinal heading after calculating new coordinates
@@ -67,14 +111,36 @@ var getFinalDestination = function(route) {
   // return object with x and y properties of the destination coordinates
   return {
     "x": x,
-    "y": y
+    "y": y,
+    "path": path
   };
 }
 
 // calculates the distance between start (0,0) and end destination obj with x and y properties
-var calcDistance = function (dest) {
+const calcDistance = function (dest) {
   return Math.abs(0-dest.x) + Math.abs(0-dest.y);
 }
 
+// supposed to return the first x and y visited twice but I can't seem to make it work.
+const findFirstReVisit = function (path) {
+  // using ES6 Sets
+  let visited = new Set();
+  // double loop adds key then check if the key is already there in the second looop
+  for(let i = 0; i < path.length-1; i++){
+    const key = `${path[i].x},${path[i].y}`;
+    if (visited.has(key)) {
+      return {
+        "x": path[i].x,
+        "y": path[i].y
+      };
+    } else {
+      visited.add(key);
+    }
+  }
+}
+
 // get final destination coordinates and calculate the distance
-calcDistance(getFinalDestination(route));
+console.log("Distance to End of Route ", calcDistance(getTripInfo(route)));
+
+// get first point of revisit
+console.log("Distance to First Point Traversed Twice ", calcDistance(findFirstReVisit(getTripInfo(route).path)));
