@@ -13,13 +13,13 @@ const getTripInfo = function(route) {
   let path = [];
 
   // calculates the new cardinal heading
-  const getNewHeading = function (step) {
+  const getNewHeading = function (direction) {
     // reset 360 to 0 to prevent going above 360
     if(pointing === 360)
       pointing = 0;
 
     // if turning left reduce by 90, if right add 90
-    if(step.indexOf("L") > -1)
+    if(direction === "L")
       pointing -= 90;
     else
       pointing += 90;
@@ -100,7 +100,7 @@ const getTripInfo = function(route) {
     }
 
     // get new cardinal heading after calculating new coordinates
-    getNewHeading(step);
+    getNewHeading(direction);
   }
 
   // make turns for each step in the route
@@ -110,15 +110,17 @@ const getTripInfo = function(route) {
 
   // return object with x and y properties of the destination coordinates
   return {
-    "x": x,
-    "y": y,
+    "dest": {
+      "x": x,
+      "y": y
+    },
     "path": path
   };
 }
 
 // calculates the distance between start (0,0) and end destination obj with x and y properties
 const calcDistance = function (dest) {
-  return Math.abs(0-dest.x) + Math.abs(0-dest.y);
+  return Math.abs(dest.x) + Math.abs(dest.y);
 }
 
 // supposed to return the first x and y visited twice but I can't seem to make it work.
@@ -140,7 +142,7 @@ const findFirstReVisit = function (path) {
 }
 
 // get final destination coordinates and calculate the distance
-console.log("Distance to End of Route ", calcDistance(getTripInfo(route)));
+console.log("Distance to End of Route ", calcDistance(getTripInfo(route).dest));
 
 // get first point of revisit
 console.log("Distance to First Point Traversed Twice ", calcDistance(findFirstReVisit(getTripInfo(route).path)));
