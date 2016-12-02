@@ -104,8 +104,8 @@ const getTripInfo = function(route) {
   }
 
   // make turns for each step in the route
-  routeAsArray.forEach(function(direction){
-    turn(direction);
+  routeAsArray.forEach(function(step){
+    turn(step);
   });
 
   // return object with x and y properties of the destination coordinates
