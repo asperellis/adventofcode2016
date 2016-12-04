@@ -1,4 +1,4 @@
-var data = [
+const data = [
   [
     "541",
     "588",
@@ -9578,4 +9578,5 @@ for(var i = 0; i < data.length-1; i+=3) {
   }
 }
 
+// output valid triangles
 console.log("Part 2, Valid Triangles: ", valid);
