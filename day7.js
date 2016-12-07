@@ -2001,16 +2001,6 @@ const data = [
   "tivudfusgnewzshs[mausfjbgxmyibin]yponuityptavbhekrlg[qeyafuevtlqemtfa]owtdxadrwwbxbrkl[obfcyxbifipwhduubu]mjocivgvrcbrllso"
 ];
 
-// array for manipulated data and counter for TLS support
-let newData = [];
-let supportsTLS = 0;
-let supportsSSL = 0;
-
-// split data strings into arrays marking HYPERNET indexes - seems dumb to do it this way. should be a different solution
-for(let i = 0; i < data.length; i++){
-  newData.push(data[i].replace(/\[/g, ",HYPERNET-").replace(/\]/g,",").split(','));
-}
-
 // checks if an array of strings has abba. if there is abba in the HYPERNET- string then automatically fail
 const hasAbba = function(arr) {
   let flag = false;
@@ -2019,7 +2009,7 @@ const hasAbba = function(arr) {
     for(let z = 0; z < str.length; z++){
       if(str[z] === str[z+3] && str[z+1] === str[z+2] && str[z] !== str[z+1]) {
         flag = true;
-        if(str.indexOf('HYPERNET-') === 0)
+        if(str.indexOf(hypernetFlag) === 0)
           return false;
       }
     }
@@ -2032,36 +2022,42 @@ const hasAba = function(arr) {
   let flag = false;
   let aba = [];
   //search for abas
-  for(let j = 0; j < arr.length; j++){
-    let str = arr[j];
+  arr.forEach(function(str) {
     for(let z = 0; z < str.length; z++){
-      if(str[z] === str[z+2] && str.indexOf('HYPERNET-') !== 0){
+      if(str[z] === str[z+2] && str.indexOf(hypernetFlag) < 0){
         aba.push(str.substr(z,3));
       }
     }
-  }
+  });
 
   // if there are abas search for babs
   if(aba.length > 0) {
     aba.forEach(function(a) {
-      bab = a[1]+a[0]+a[1]; // any way to do this better?
-      for(let j = 0; j < arr.length; j++){
-        let str = arr[j];
+      let bab = a[1]+a[0]+a[1]; // any way to do this better?
+      arr.forEach(function(str) {
         for(let z = 0; z < str.length; z++){
-          if(str.indexOf('HYPERNET-') === 0 && str.indexOf(bab) >= 0){
+          if(str.indexOf(hypernetFlag) >= 0 && str.indexOf(bab) >= 0){
             flag = true;
             break;
           }
         }
-      }
+      });
     });
   }
 
   return flag;
 };
 
+// counters and flag i used to mark hypernet strings
+let supportsTLS = 0;
+let supportsSSL = 0;
+const hypernetFlag = 'HYPERNET-';
+
 // check each array for TLS and SSL support
-newData.forEach(function(arr){
+data.forEach(function(str){
+  // split index of data into array marking hypernet indexes
+  let arr = str.replace(/\[/g, ',' + hypernetFlag).replace(/\]/g,",").split(',');
+
   if(hasAbba(arr))
     supportsTLS++;
   if(hasAba(arr))
@@ -2069,5 +2065,5 @@ newData.forEach(function(arr){
 });
 
 // answers
-console.log("Part 1: Supports TLS: ", supportsTLS);
-console.log("Part 2: Supports SSL: ", supportsSSL);
+console.log('Part 1: Supports TLS: ', supportsTLS);
+console.log('Part 2: Supports SSL: ', supportsSSL);
