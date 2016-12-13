@@ -57,7 +57,6 @@ const findPass = function() {
      ruleVars = input[rule].split(' '); // split the rule string into an array
      command = ruleVars[0]; // first is always the rule
 
-
      // second and potential third indexes of arrays could be used based on rule
      switch(command){
        case 'cpy':
