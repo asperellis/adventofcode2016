@@ -3,36 +3,37 @@
 // I know I could  require things but I'm lazy;
 
 // puzzle input
-var input = 1358;
+const input = 1358;
 
 // calculates the coord number with given eq and add input
-var calcCoordNumber = function(x, y) {
+const calcCoordNumber = function(x, y) {
   return (x*x + 3*x + 2*x*y + y + y*y) + input;
 };
 
 // turns number into a binary
-var makeBinary = function(num) {
+const makeBinary = function(num) {
   return num.toString(2);
 };
 
 //  checks if its a wall or an office and returns the value for either to use with the A* 1 = office / 0 = wall
-var isWallOrOffice = function(num) {
-  var check = num.match(new RegExp("1", "g") || []).length;
+const isWallOrOffice = function(num) {
+  const check = num.match(new RegExp("1", "g") || []).length;
   return check % 2 === 0 ? 1 : 0;
 };
 
 // array to hold the floor plan
-var floorPlan = [];
+let floorPlan = [];
 
 // construct the floor plan
-for(var i = 0; i < 100; i++) {
-  var row = [];
-  for(var j = 0; j < 100; j++) {
+for(let i = 0; i < 100; i++) {
+  let row = [];
+  for(let j = 0; j < 100; j++) {
     row.push(isWallOrOffice(makeBinary(calcCoordNumber(j, i))));
   }
   floorPlan.push(row);
 }
 
+//
 // A STAR PATH SEARCH CODE - NOT MINE - CREDITS BELOW
 // javascript-astar 0.4.1
 // http://github.com/bgrins/javascript-astar
@@ -441,20 +442,20 @@ return {
 // END OF A*
 
 // create a graph with the floorplan and find distance to specified point for part 1
-var graph = new Graph(floorPlan);
-var start = graph.grid[1][1];
-var end = graph.grid[39][31];
-var result = astar.search(graph, start, end);
+const graph = new Graph(floorPlan);
+const start = graph.grid[1][1];
+const end = graph.grid[39][31];
+const result = astar.search(graph, start, end);
 
 // counter for all the points reachable in 50 or less steps
-var reachinFifty = 0;
+let reachinFifty = 0;
 // for each array index
-for(var i = 0; i < 100; i++) {
-  for(var j = 0; j < 100; j++) {
+for(let i = 0; i < 100; i++) {
+  for(let j = 0; j < 100; j++) {
     // if the point is an office search for the shortest path to it and if its less than 50 steps add to counter
     if(floorPlan[i][j] === 1){
-      var pathCheckEnd = graph.grid[i][j];
-      var checkResult = astar.search(graph, start, pathCheckEnd);
+      const pathCheckEnd = graph.grid[i][j];
+      const checkResult = astar.search(graph, start, pathCheckEnd);
       if(checkResult.length <= 50 && checkResult.length > 0)
         reachinFifty++;
     }

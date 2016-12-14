@@ -2,15 +2,15 @@ class Building {
   constructor(floors) {
     this.elevator = new Elevator();
     for(let i = 1; i <= floors; i++) {
-      this[i] = new Floor();
+      this['F'+i] = new Floor();
     }
-    this[1].contents.push(this.elevator);
+    this['F1'].contents.push(this.elevator);
   }
 
   moveElevator(direction) {
     if(this.elevator.canMove(direction)){
       const e = this[this.elevator.location].contents.indexOf(building.elevator);
-      if(i != -1) {
+      if(e !== -1) {
       	this[this.elevator.location].contents.splice(e, 1);
       }
       this.elevator.move(direction);
@@ -23,11 +23,22 @@ class Floor {
   constructor() {
     this.contents = [];
   }
+
+  add(content) {
+    this.contents.push(content);
+  }
+
+  remove(content) {
+    const e = this.contents.indexOf(content);
+    if(e !== -1) {
+      this.contents.splice(e, 1);
+    }
+  }
 };
 
 class Elevator {
   constructor() {
-    this.location = 1;
+    this.location = 'F1';
     this.contents = [];
     this.activated = false;
     this.steps = 0;
@@ -61,7 +72,12 @@ class Elevator {
   }
 
   remove(content) {
-
+    const e = this.contents.indexOf(content);
+    if(e !== -1) {
+      this.contents.splice(e, 1);
+    }
+    if(this.contents.length === 0)
+      this.activated = false;
   }
 };
 
@@ -85,7 +101,7 @@ class Microchip {
   }
 
   canMove() {
-    
+
   }
 }
 
