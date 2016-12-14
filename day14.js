@@ -1,204 +1,125 @@
-// MD5 Script from - https://css-tricks.com/snippets/javascript/javascript-md5/
-const MD5 = function (string) {
+/**
+ * [js-md5]{@link https://github.com/emn178/js-md5}
+ *
+ * @namespace md5
+ * @version 0.4.1
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2014-2016
+ * @license MIT
+ */
+ 
+! function(t) {
+    "use strict";
 
-   function RotateLeft(lValue, iShiftBits) {
-           return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
-   }
-
-   function AddUnsigned(lX,lY) {
-           var lX4,lY4,lX8,lY8,lResult;
-           lX8 = (lX & 0x80000000);
-           lY8 = (lY & 0x80000000);
-           lX4 = (lX & 0x40000000);
-           lY4 = (lY & 0x40000000);
-           lResult = (lX & 0x3FFFFFFF)+(lY & 0x3FFFFFFF);
-           if (lX4 & lY4) {
-                   return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
-           }
-           if (lX4 | lY4) {
-                   if (lResult & 0x40000000) {
-                           return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
-                   } else {
-                           return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
-                   }
-           } else {
-                   return (lResult ^ lX8 ^ lY8);
-           }
-   }
-
-   function F(x,y,z) { return (x & y) | ((~x) & z); }
-   function G(x,y,z) { return (x & z) | (y & (~z)); }
-   function H(x,y,z) { return (x ^ y ^ z); }
-   function I(x,y,z) { return (y ^ (x | (~z))); }
-
-   function FF(a,b,c,d,x,s,ac) {
-           a = AddUnsigned(a, AddUnsigned(AddUnsigned(F(b, c, d), x), ac));
-           return AddUnsigned(RotateLeft(a, s), b);
-   };
-
-   function GG(a,b,c,d,x,s,ac) {
-           a = AddUnsigned(a, AddUnsigned(AddUnsigned(G(b, c, d), x), ac));
-           return AddUnsigned(RotateLeft(a, s), b);
-   };
-
-   function HH(a,b,c,d,x,s,ac) {
-           a = AddUnsigned(a, AddUnsigned(AddUnsigned(H(b, c, d), x), ac));
-           return AddUnsigned(RotateLeft(a, s), b);
-   };
-
-   function II(a,b,c,d,x,s,ac) {
-           a = AddUnsigned(a, AddUnsigned(AddUnsigned(I(b, c, d), x), ac));
-           return AddUnsigned(RotateLeft(a, s), b);
-   };
-
-   function ConvertToWordArray(string) {
-           var lWordCount;
-           var lMessageLength = string.length;
-           var lNumberOfWords_temp1=lMessageLength + 8;
-           var lNumberOfWords_temp2=(lNumberOfWords_temp1-(lNumberOfWords_temp1 % 64))/64;
-           var lNumberOfWords = (lNumberOfWords_temp2+1)*16;
-           var lWordArray=Array(lNumberOfWords-1);
-           var lBytePosition = 0;
-           var lByteCount = 0;
-           while ( lByteCount < lMessageLength ) {
-                   lWordCount = (lByteCount-(lByteCount % 4))/4;
-                   lBytePosition = (lByteCount % 4)*8;
-                   lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount)<<lBytePosition));
-                   lByteCount++;
-           }
-           lWordCount = (lByteCount-(lByteCount % 4))/4;
-           lBytePosition = (lByteCount % 4)*8;
-           lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80<<lBytePosition);
-           lWordArray[lNumberOfWords-2] = lMessageLength<<3;
-           lWordArray[lNumberOfWords-1] = lMessageLength>>>29;
-           return lWordArray;
-   };
-
-   function WordToHex(lValue) {
-           var WordToHexValue="",WordToHexValue_temp="",lByte,lCount;
-           for (lCount = 0;lCount<=3;lCount++) {
-                   lByte = (lValue>>>(lCount*8)) & 255;
-                   WordToHexValue_temp = "0" + lByte.toString(16);
-                   WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length-2,2);
-           }
-           return WordToHexValue;
-   };
-
-   function Utf8Encode(string) {
-           string = string.replace(/\r\n/g,"\n");
-           var utftext = "";
-
-           for (var n = 0; n < string.length; n++) {
-
-                   var c = string.charCodeAt(n);
-
-                   if (c < 128) {
-                           utftext += String.fromCharCode(c);
-                   }
-                   else if((c > 127) && (c < 2048)) {
-                           utftext += String.fromCharCode((c >> 6) | 192);
-                           utftext += String.fromCharCode((c & 63) | 128);
-                   }
-                   else {
-                           utftext += String.fromCharCode((c >> 12) | 224);
-                           utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                           utftext += String.fromCharCode((c & 63) | 128);
-                   }
-
-           }
-
-           return utftext;
-   };
-
-   var x=Array();
-   var k,AA,BB,CC,DD,a,b,c,d;
-   var S11=7, S12=12, S13=17, S14=22;
-   var S21=5, S22=9 , S23=14, S24=20;
-   var S31=4, S32=11, S33=16, S34=23;
-   var S41=6, S42=10, S43=15, S44=21;
-
-   string = Utf8Encode(string);
-
-   x = ConvertToWordArray(string);
-
-   a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
-
-   for (k=0;k<x.length;k+=16) {
-           AA=a; BB=b; CC=c; DD=d;
-           a=FF(a,b,c,d,x[k+0], S11,0xD76AA478);
-           d=FF(d,a,b,c,x[k+1], S12,0xE8C7B756);
-           c=FF(c,d,a,b,x[k+2], S13,0x242070DB);
-           b=FF(b,c,d,a,x[k+3], S14,0xC1BDCEEE);
-           a=FF(a,b,c,d,x[k+4], S11,0xF57C0FAF);
-           d=FF(d,a,b,c,x[k+5], S12,0x4787C62A);
-           c=FF(c,d,a,b,x[k+6], S13,0xA8304613);
-           b=FF(b,c,d,a,x[k+7], S14,0xFD469501);
-           a=FF(a,b,c,d,x[k+8], S11,0x698098D8);
-           d=FF(d,a,b,c,x[k+9], S12,0x8B44F7AF);
-           c=FF(c,d,a,b,x[k+10],S13,0xFFFF5BB1);
-           b=FF(b,c,d,a,x[k+11],S14,0x895CD7BE);
-           a=FF(a,b,c,d,x[k+12],S11,0x6B901122);
-           d=FF(d,a,b,c,x[k+13],S12,0xFD987193);
-           c=FF(c,d,a,b,x[k+14],S13,0xA679438E);
-           b=FF(b,c,d,a,x[k+15],S14,0x49B40821);
-           a=GG(a,b,c,d,x[k+1], S21,0xF61E2562);
-           d=GG(d,a,b,c,x[k+6], S22,0xC040B340);
-           c=GG(c,d,a,b,x[k+11],S23,0x265E5A51);
-           b=GG(b,c,d,a,x[k+0], S24,0xE9B6C7AA);
-           a=GG(a,b,c,d,x[k+5], S21,0xD62F105D);
-           d=GG(d,a,b,c,x[k+10],S22,0x2441453);
-           c=GG(c,d,a,b,x[k+15],S23,0xD8A1E681);
-           b=GG(b,c,d,a,x[k+4], S24,0xE7D3FBC8);
-           a=GG(a,b,c,d,x[k+9], S21,0x21E1CDE6);
-           d=GG(d,a,b,c,x[k+14],S22,0xC33707D6);
-           c=GG(c,d,a,b,x[k+3], S23,0xF4D50D87);
-           b=GG(b,c,d,a,x[k+8], S24,0x455A14ED);
-           a=GG(a,b,c,d,x[k+13],S21,0xA9E3E905);
-           d=GG(d,a,b,c,x[k+2], S22,0xFCEFA3F8);
-           c=GG(c,d,a,b,x[k+7], S23,0x676F02D9);
-           b=GG(b,c,d,a,x[k+12],S24,0x8D2A4C8A);
-           a=HH(a,b,c,d,x[k+5], S31,0xFFFA3942);
-           d=HH(d,a,b,c,x[k+8], S32,0x8771F681);
-           c=HH(c,d,a,b,x[k+11],S33,0x6D9D6122);
-           b=HH(b,c,d,a,x[k+14],S34,0xFDE5380C);
-           a=HH(a,b,c,d,x[k+1], S31,0xA4BEEA44);
-           d=HH(d,a,b,c,x[k+4], S32,0x4BDECFA9);
-           c=HH(c,d,a,b,x[k+7], S33,0xF6BB4B60);
-           b=HH(b,c,d,a,x[k+10],S34,0xBEBFBC70);
-           a=HH(a,b,c,d,x[k+13],S31,0x289B7EC6);
-           d=HH(d,a,b,c,x[k+0], S32,0xEAA127FA);
-           c=HH(c,d,a,b,x[k+3], S33,0xD4EF3085);
-           b=HH(b,c,d,a,x[k+6], S34,0x4881D05);
-           a=HH(a,b,c,d,x[k+9], S31,0xD9D4D039);
-           d=HH(d,a,b,c,x[k+12],S32,0xE6DB99E5);
-           c=HH(c,d,a,b,x[k+15],S33,0x1FA27CF8);
-           b=HH(b,c,d,a,x[k+2], S34,0xC4AC5665);
-           a=II(a,b,c,d,x[k+0], S41,0xF4292244);
-           d=II(d,a,b,c,x[k+7], S42,0x432AFF97);
-           c=II(c,d,a,b,x[k+14],S43,0xAB9423A7);
-           b=II(b,c,d,a,x[k+5], S44,0xFC93A039);
-           a=II(a,b,c,d,x[k+12],S41,0x655B59C3);
-           d=II(d,a,b,c,x[k+3], S42,0x8F0CCC92);
-           c=II(c,d,a,b,x[k+10],S43,0xFFEFF47D);
-           b=II(b,c,d,a,x[k+1], S44,0x85845DD1);
-           a=II(a,b,c,d,x[k+8], S41,0x6FA87E4F);
-           d=II(d,a,b,c,x[k+15],S42,0xFE2CE6E0);
-           c=II(c,d,a,b,x[k+6], S43,0xA3014314);
-           b=II(b,c,d,a,x[k+13],S44,0x4E0811A1);
-           a=II(a,b,c,d,x[k+4], S41,0xF7537E82);
-           d=II(d,a,b,c,x[k+11],S42,0xBD3AF235);
-           c=II(c,d,a,b,x[k+2], S43,0x2AD7D2BB);
-           b=II(b,c,d,a,x[k+9], S44,0xEB86D391);
-           a=AddUnsigned(a,AA);
-           b=AddUnsigned(b,BB);
-           c=AddUnsigned(c,CC);
-           d=AddUnsigned(d,DD);
-   		}
-
-   	var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
-
-   	return temp.toLowerCase();
-};
+    function r(t) {
+        if (t) c[0] = c[16] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] = c[10] = c[11] = c[12] = c[13] = c[14] = c[15] = 0, this.blocks = c, this.buffer8 = i;
+        else if (n) {
+            var r = new ArrayBuffer(68);
+            this.buffer8 = new Uint8Array(r), this.blocks = new Uint32Array(r)
+        } else this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.h0 = this.h1 = this.h2 = this.h3 = this.start = this.bytes = 0, this.finalized = this.hashed = !1, this.first = !0
+    }
+    var e = "object" == typeof process && process.versions && process.versions.node;
+    e && (t = global);
+    var i, h = !t.JS_MD5_TEST && "object" == typeof module && module.exports,
+        s = "function" == typeof define && define.amd,
+        n = !t.JS_MD5_TEST && "undefined" != typeof ArrayBuffer,
+        f = "0123456789abcdef".split(""),
+        a = [128, 32768, 8388608, -2147483648],
+        o = [0, 8, 16, 24],
+        u = ["hex", "array", "digest", "buffer", "arrayBuffer"],
+        c = [];
+    if (n) {
+        var p = new ArrayBuffer(68);
+        i = new Uint8Array(p), c = new Uint32Array(p)
+    }
+    var y = function(t) {
+            return function(e) {
+                return new r(!0).update(e)[t]()
+            }
+        },
+        d = function() {
+            var t = y("hex");
+            e && (t = l(t)), t.create = function() {
+                return new r
+            }, t.update = function(r) {
+                return t.create().update(r)
+            };
+            for (var i = 0; i < u.length; ++i) {
+                var h = u[i];
+                t[h] = y(h)
+            }
+            return t
+        },
+        l = function(r) {
+            var e, i;
+            try {
+                if (t.JS_MD5_TEST) throw "JS_MD5_TEST";
+                e = require("crypto"), i = require("buffer").Buffer
+            } catch (h) {
+                return console.log(h), r
+            }
+            var s = function(t) {
+                if ("string" == typeof t) return e.createHash("md5").update(t, "utf8").digest("hex");
+                if (t.constructor == ArrayBuffer) t = new Uint8Array(t);
+                else if (void 0 === t.length) return r(t);
+                return e.createHash("md5").update(new i(t)).digest("hex")
+            };
+            return s
+        };
+    r.prototype.update = function(r) {
+        if (!this.finalized) {
+            var e = "string" != typeof r;
+            e && r.constructor == t.ArrayBuffer && (r = new Uint8Array(r));
+            for (var i, h, s = 0, f = r.length || 0, a = this.blocks, u = this.buffer8; f > s;) {
+                if (this.hashed && (this.hashed = !1, a[0] = a[16], a[16] = a[1] = a[2] = a[3] = a[4] = a[5] = a[6] = a[7] = a[8] = a[9] = a[10] = a[11] = a[12] = a[13] = a[14] = a[15] = 0), e)
+                    if (n)
+                        for (h = this.start; f > s && 64 > h; ++s) u[h++] = r[s];
+                    else
+                        for (h = this.start; f > s && 64 > h; ++s) a[h >> 2] |= r[s] << o[3 & h++];
+                else if (n)
+                    for (h = this.start; f > s && 64 > h; ++s) i = r.charCodeAt(s), 128 > i ? u[h++] = i : 2048 > i ? (u[h++] = 192 | i >> 6, u[h++] = 128 | 63 & i) : 55296 > i || i >= 57344 ? (u[h++] = 224 | i >> 12, u[h++] = 128 | i >> 6 & 63, u[h++] = 128 | 63 & i) : (i = 65536 + ((1023 & i) << 10 | 1023 & r.charCodeAt(++s)), u[h++] = 240 | i >> 18, u[h++] = 128 | i >> 12 & 63, u[h++] = 128 | i >> 6 & 63, u[h++] = 128 | 63 & i);
+                else
+                    for (h = this.start; f > s && 64 > h; ++s) i = r.charCodeAt(s), 128 > i ? a[h >> 2] |= i << o[3 & h++] : 2048 > i ? (a[h >> 2] |= (192 | i >> 6) << o[3 & h++], a[h >> 2] |= (128 | 63 & i) << o[3 & h++]) : 55296 > i || i >= 57344 ? (a[h >> 2] |= (224 | i >> 12) << o[3 & h++], a[h >> 2] |= (128 | i >> 6 & 63) << o[3 & h++], a[h >> 2] |= (128 | 63 & i) << o[3 & h++]) : (i = 65536 + ((1023 & i) << 10 | 1023 & r.charCodeAt(++s)), a[h >> 2] |= (240 | i >> 18) << o[3 & h++], a[h >> 2] |= (128 | i >> 12 & 63) << o[3 & h++], a[h >> 2] |= (128 | i >> 6 & 63) << o[3 & h++], a[h >> 2] |= (128 | 63 & i) << o[3 & h++]);
+                this.lastByteIndex = h, this.bytes += h - this.start, h >= 64 ? (this.start = h - 64, this.hash(), this.hashed = !0) : this.start = h
+            }
+            return this
+        }
+    }, r.prototype.finalize = function() {
+        if (!this.finalized) {
+            this.finalized = !0;
+            var t = this.blocks,
+                r = this.lastByteIndex;
+            t[r >> 2] |= a[3 & r], r >= 56 && (this.hashed || this.hash(), t[0] = t[16], t[16] = t[1] = t[2] = t[3] = t[4] = t[5] = t[6] = t[7] = t[8] = t[9] = t[10] = t[11] = t[12] = t[13] = t[14] = t[15] = 0), t[14] = this.bytes << 3, this.hash()
+        }
+    }, r.prototype.hash = function() {
+        var t, r, e, i, h, s, n = this.blocks;
+        this.first ? (t = n[0] - 680876937, t = (t << 7 | t >>> 25) - 271733879 << 0, i = (-1732584194 ^ 2004318071 & t) + n[1] - 117830708, i = (i << 12 | i >>> 20) + t << 0, e = (-271733879 ^ i & (-271733879 ^ t)) + n[2] - 1126478375, e = (e << 17 | e >>> 15) + i << 0, r = (t ^ e & (i ^ t)) + n[3] - 1316259209, r = (r << 22 | r >>> 10) + e << 0) : (t = this.h0, r = this.h1, e = this.h2, i = this.h3, t += (i ^ r & (e ^ i)) + n[0] - 680876936, t = (t << 7 | t >>> 25) + r << 0, i += (e ^ t & (r ^ e)) + n[1] - 389564586, i = (i << 12 | i >>> 20) + t << 0, e += (r ^ i & (t ^ r)) + n[2] + 606105819, e = (e << 17 | e >>> 15) + i << 0, r += (t ^ e & (i ^ t)) + n[3] - 1044525330, r = (r << 22 | r >>> 10) + e << 0), t += (i ^ r & (e ^ i)) + n[4] - 176418897, t = (t << 7 | t >>> 25) + r << 0, i += (e ^ t & (r ^ e)) + n[5] + 1200080426, i = (i << 12 | i >>> 20) + t << 0, e += (r ^ i & (t ^ r)) + n[6] - 1473231341, e = (e << 17 | e >>> 15) + i << 0, r += (t ^ e & (i ^ t)) + n[7] - 45705983, r = (r << 22 | r >>> 10) + e << 0, t += (i ^ r & (e ^ i)) + n[8] + 1770035416, t = (t << 7 | t >>> 25) + r << 0, i += (e ^ t & (r ^ e)) + n[9] - 1958414417, i = (i << 12 | i >>> 20) + t << 0, e += (r ^ i & (t ^ r)) + n[10] - 42063, e = (e << 17 | e >>> 15) + i << 0, r += (t ^ e & (i ^ t)) + n[11] - 1990404162, r = (r << 22 | r >>> 10) + e << 0, t += (i ^ r & (e ^ i)) + n[12] + 1804603682, t = (t << 7 | t >>> 25) + r << 0, i += (e ^ t & (r ^ e)) + n[13] - 40341101, i = (i << 12 | i >>> 20) + t << 0, e += (r ^ i & (t ^ r)) + n[14] - 1502002290, e = (e << 17 | e >>> 15) + i << 0, r += (t ^ e & (i ^ t)) + n[15] + 1236535329, r = (r << 22 | r >>> 10) + e << 0, t += (e ^ i & (r ^ e)) + n[1] - 165796510, t = (t << 5 | t >>> 27) + r << 0, i += (r ^ e & (t ^ r)) + n[6] - 1069501632, i = (i << 9 | i >>> 23) + t << 0, e += (t ^ r & (i ^ t)) + n[11] + 643717713, e = (e << 14 | e >>> 18) + i << 0, r += (i ^ t & (e ^ i)) + n[0] - 373897302, r = (r << 20 | r >>> 12) + e << 0, t += (e ^ i & (r ^ e)) + n[5] - 701558691, t = (t << 5 | t >>> 27) + r << 0, i += (r ^ e & (t ^ r)) + n[10] + 38016083, i = (i << 9 | i >>> 23) + t << 0, e += (t ^ r & (i ^ t)) + n[15] - 660478335, e = (e << 14 | e >>> 18) + i << 0, r += (i ^ t & (e ^ i)) + n[4] - 405537848, r = (r << 20 | r >>> 12) + e << 0, t += (e ^ i & (r ^ e)) + n[9] + 568446438, t = (t << 5 | t >>> 27) + r << 0, i += (r ^ e & (t ^ r)) + n[14] - 1019803690, i = (i << 9 | i >>> 23) + t << 0, e += (t ^ r & (i ^ t)) + n[3] - 187363961, e = (e << 14 | e >>> 18) + i << 0, r += (i ^ t & (e ^ i)) + n[8] + 1163531501, r = (r << 20 | r >>> 12) + e << 0, t += (e ^ i & (r ^ e)) + n[13] - 1444681467, t = (t << 5 | t >>> 27) + r << 0, i += (r ^ e & (t ^ r)) + n[2] - 51403784, i = (i << 9 | i >>> 23) + t << 0, e += (t ^ r & (i ^ t)) + n[7] + 1735328473, e = (e << 14 | e >>> 18) + i << 0, r += (i ^ t & (e ^ i)) + n[12] - 1926607734, r = (r << 20 | r >>> 12) + e << 0, h = r ^ e, t += (h ^ i) + n[5] - 378558, t = (t << 4 | t >>> 28) + r << 0, i += (h ^ t) + n[8] - 2022574463, i = (i << 11 | i >>> 21) + t << 0, s = i ^ t, e += (s ^ r) + n[11] + 1839030562, e = (e << 16 | e >>> 16) + i << 0, r += (s ^ e) + n[14] - 35309556, r = (r << 23 | r >>> 9) + e << 0, h = r ^ e, t += (h ^ i) + n[1] - 1530992060, t = (t << 4 | t >>> 28) + r << 0, i += (h ^ t) + n[4] + 1272893353, i = (i << 11 | i >>> 21) + t << 0, s = i ^ t, e += (s ^ r) + n[7] - 155497632, e = (e << 16 | e >>> 16) + i << 0, r += (s ^ e) + n[10] - 1094730640, r = (r << 23 | r >>> 9) + e << 0, h = r ^ e, t += (h ^ i) + n[13] + 681279174, t = (t << 4 | t >>> 28) + r << 0, i += (h ^ t) + n[0] - 358537222, i = (i << 11 | i >>> 21) + t << 0, s = i ^ t, e += (s ^ r) + n[3] - 722521979, e = (e << 16 | e >>> 16) + i << 0, r += (s ^ e) + n[6] + 76029189, r = (r << 23 | r >>> 9) + e << 0, h = r ^ e, t += (h ^ i) + n[9] - 640364487, t = (t << 4 | t >>> 28) + r << 0, i += (h ^ t) + n[12] - 421815835, i = (i << 11 | i >>> 21) + t << 0, s = i ^ t, e += (s ^ r) + n[15] + 530742520, e = (e << 16 | e >>> 16) + i << 0, r += (s ^ e) + n[2] - 995338651, r = (r << 23 | r >>> 9) + e << 0, t += (e ^ (r | ~i)) + n[0] - 198630844, t = (t << 6 | t >>> 26) + r << 0, i += (r ^ (t | ~e)) + n[7] + 1126891415, i = (i << 10 | i >>> 22) + t << 0, e += (t ^ (i | ~r)) + n[14] - 1416354905, e = (e << 15 | e >>> 17) + i << 0, r += (i ^ (e | ~t)) + n[5] - 57434055, r = (r << 21 | r >>> 11) + e << 0, t += (e ^ (r | ~i)) + n[12] + 1700485571, t = (t << 6 | t >>> 26) + r << 0, i += (r ^ (t | ~e)) + n[3] - 1894986606, i = (i << 10 | i >>> 22) + t << 0, e += (t ^ (i | ~r)) + n[10] - 1051523, e = (e << 15 | e >>> 17) + i << 0, r += (i ^ (e | ~t)) + n[1] - 2054922799, r = (r << 21 | r >>> 11) + e << 0, t += (e ^ (r | ~i)) + n[8] + 1873313359, t = (t << 6 | t >>> 26) + r << 0, i += (r ^ (t | ~e)) + n[15] - 30611744, i = (i << 10 | i >>> 22) + t << 0, e += (t ^ (i | ~r)) + n[6] - 1560198380, e = (e << 15 | e >>> 17) + i << 0, r += (i ^ (e | ~t)) + n[13] + 1309151649, r = (r << 21 | r >>> 11) + e << 0, t += (e ^ (r | ~i)) + n[4] - 145523070, t = (t << 6 | t >>> 26) + r << 0, i += (r ^ (t | ~e)) + n[11] - 1120210379, i = (i << 10 | i >>> 22) + t << 0, e += (t ^ (i | ~r)) + n[2] + 718787259, e = (e << 15 | e >>> 17) + i << 0, r += (i ^ (e | ~t)) + n[9] - 343485551, r = (r << 21 | r >>> 11) + e << 0, this.first ? (this.h0 = t + 1732584193 << 0, this.h1 = r - 271733879 << 0, this.h2 = e - 1732584194 << 0, this.h3 = i + 271733878 << 0, this.first = !1) : (this.h0 = this.h0 + t << 0, this.h1 = this.h1 + r << 0, this.h2 = this.h2 + e << 0, this.h3 = this.h3 + i << 0)
+    }, r.prototype.hex = function() {
+        this.finalize();
+        var t = this.h0,
+            r = this.h1,
+            e = this.h2,
+            i = this.h3;
+        return f[t >> 4 & 15] + f[15 & t] + f[t >> 12 & 15] + f[t >> 8 & 15] + f[t >> 20 & 15] + f[t >> 16 & 15] + f[t >> 28 & 15] + f[t >> 24 & 15] + f[r >> 4 & 15] + f[15 & r] + f[r >> 12 & 15] + f[r >> 8 & 15] + f[r >> 20 & 15] + f[r >> 16 & 15] + f[r >> 28 & 15] + f[r >> 24 & 15] + f[e >> 4 & 15] + f[15 & e] + f[e >> 12 & 15] + f[e >> 8 & 15] + f[e >> 20 & 15] + f[e >> 16 & 15] + f[e >> 28 & 15] + f[e >> 24 & 15] + f[i >> 4 & 15] + f[15 & i] + f[i >> 12 & 15] + f[i >> 8 & 15] + f[i >> 20 & 15] + f[i >> 16 & 15] + f[i >> 28 & 15] + f[i >> 24 & 15]
+    }, r.prototype.toString = r.prototype.hex, r.prototype.digest = function() {
+        this.finalize();
+        var t = this.h0,
+            r = this.h1,
+            e = this.h2,
+            i = this.h3;
+        return [255 & t, t >> 8 & 255, t >> 16 & 255, t >> 24 & 255, 255 & r, r >> 8 & 255, r >> 16 & 255, r >> 24 & 255, 255 & e, e >> 8 & 255, e >> 16 & 255, e >> 24 & 255, 255 & i, i >> 8 & 255, i >> 16 & 255, i >> 24 & 255]
+    }, r.prototype.array = r.prototype.digest, r.prototype.arrayBuffer = function() {
+        this.finalize();
+        var t = new ArrayBuffer(16),
+            r = new Uint32Array(t);
+        return r[0] = this.h0, r[1] = this.h1, r[2] = this.h2, r[3] = this.h3, t
+    }, r.prototype.buffer = r.prototype.arrayBuffer;
+    var v = d();
+    h ? module.exports = v : (t.md5 = v, s && define(function() {
+        return v
+    }))
+}(this);
 
 // constants
 const salt = "cuanljph"; // input
@@ -206,40 +127,41 @@ const maxKeyLength = 64; // length of final solution to use in loop
 
 // for part 2 - stretches hash 2016 more times
 const stretchHash = function(hash) {
-  let stetchedHash = hash;
-  for(let k = 0; k < 2016; k++) {
-    stetchedHash = MD5(stetchedHash);
-  }
-  return stetchedHash;
+    let stetchedHash = hash;
+    for (let k = 0; k < 2016; k++) {
+        stetchedHash = md5(stetchedHash);
+    }
+    return stetchedHash;
 };
 
 // get Keys function
 // pass in whether or not to stretch the keys, start with empty key and index at 0 everytime
 const getKeys = function(stretch) {
-  let index = 0;
-  let keys = [];
-  // do loop until keys array is 64 in length
-  while(keys.length < maxKeyLength){
-    let hash = stretch ? stretchHash(MD5(salt + index)) : MD5(salt + index);
-    // if the hash has 3 of the same char
-    if(hash.match(/(.)\1{2}/) !== null) {
-      // get char
-      let char = hash.match(/(.)\1{2}/)[1];
-      // for the next 1000 indexes
-      for(let i = index + 1; i < index + 1001; i++) {
-        let checkHash = stretch ? stretchHash(MD5(salt + i)) : MD5(salt + i);
-        // check if the hash at index has 5 of that same char and if it does add it to keys array
-        if(checkHash.match(new RegExp("(" + char + ")\\1{4}")) !== null) {
-            keys.push([char, index]);
-            break;
+    let index = 0;
+    let keys = [];
+    // do loop until keys array is 64 in length
+    while (keys.length < maxKeyLength) {
+        let hash = stretch ? stretchHash(md5(salt + index)) : md5(salt + index);
+        // if the hash has 3 of the same char
+        if (hash.match(/(.)\1{2}/) !== null) {
+            // get char
+            let char = hash.match(/(.)\1{2}/)[1];
+            // for the next 1000 indexes
+            for (let i = index + 1; i < index + 1001; i++) {
+                let checkHash = stretch ? stretchHash(md5(salt + i)) : md5(salt + i);
+                // check if the hash at index has 5 of that same char and if it does add it to keys array
+                if (checkHash.match(new RegExp("(" + char + ")\\1{4}")) !== null) {
+                    keys.push([char, index]);
+                    console.log(keys.length, index);
+                    break;
+                }
+            }
         }
-      }
-    }
-    // increase index and continue
-    index++;
-  };
+        // increase index and continue
+        index++;
+    };
 
-  return keys;
+    return keys;
 }
 
 
