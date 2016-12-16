@@ -27,20 +27,20 @@ const calcCheckSum = function(str) {
 // then gets the first checksum - if its odd return that checksum
 // if its even then continue to checksum the orig checksum until you get an odd length
 const getCheckSum = function(val, diskSize) {
-  let checkVal = val;
+  const checkVal = val;
+
   while(checkVal.length < diskSize) {
     checkVal = dragonCurve(checkVal);
   }
+  
+  // only need the size of the disk, in case we generated too many chars
   checkVal = checkVal.substr(0, diskSize);
 
   let checkSum = calcCheckSum(checkVal);
 
-  if(checkSum.length % 2 !== 0)
-    return checkSum;
-
-  do {
+  while(checkSum.length % 2 === 0) {
     checkSum = calcCheckSum(checkSum);
-  } while(checkSum.length % 2 === 0);
+  };
 
   return checkSum;
 };
