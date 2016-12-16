@@ -7,7 +7,7 @@
  * @copyright Chen, Yi-Cyuan 2014-2016
  * @license MIT
  */
- 
+
 ! function(t) {
     "use strict";
 
