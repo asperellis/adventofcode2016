@@ -444,7 +444,7 @@ return {
 // create a graph with the floorplan and find distance to specified point for part 1
 const graph = new Graph(floorPlan);
 const start = graph.grid[1][1];
-const end = graph.grid[39][31];
+const end = graph.grid[39][31]; // y then x
 const result = astar.search(graph, start, end);
 
 // counter for all the points reachable in 50 or less steps
